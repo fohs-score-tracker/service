@@ -2,9 +2,9 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from .database import Base
+
 # add to this list whenever a new class gets added
 __all__ = ["Player", "User", "db"]
-
 
 
 class User(Base):
@@ -32,4 +32,4 @@ class Player(Base):
         ForeignKey('user.id'),
         nullable=False)
     user = relationship('User',
-                           backref=backref('players', lazy=True))
+                        backref=backref('players', lazy=True))
