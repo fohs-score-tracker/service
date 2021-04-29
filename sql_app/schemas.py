@@ -26,20 +26,21 @@ class Player(PlayerBase):
 
 
 class UserBase(BaseModel):
-    pass
+    id: int
 
 
 class UserCreate(UserBase):
-    username: str
-    fullname: str
-    pw_hash: str
-    pw_salt: str
+    full_name: str
+    password: str
+    email: str
 
 
 class User(UserBase):
     id: int
+    email: str
     username: str
     full_name: str
+    password: str
 
     class Config:
         orm_mode = True

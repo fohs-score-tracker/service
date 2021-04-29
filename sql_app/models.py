@@ -4,12 +4,12 @@ from sqlalchemy.orm import relationship
 from .database import Base
 
 # add to this list whenever a new class gets added
-__all__ = ["Player", "User", "db"]
 
 
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
+    email = Column(Text, unique=True)
     username = Column(Text, unique=True)
     full_name = Column(Text)
     pw_hash = Column(Text)

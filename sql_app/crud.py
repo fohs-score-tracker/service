@@ -1,3 +1,6 @@
+import hashlib
+from secrets import token_urlsafe
+
 from sqlalchemy.orm import Session
 
 from . import models, schemas
@@ -16,11 +19,11 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create_user(db: Session, user: schemas.UserCreate):
-
-    fake_hashed_password = user.password + "notreallyhashed"
-
+    salt = token_urlsafe()
+    hashed_password = hash_pw(user.password, salt)
+    user
     db_user = models.User(
-        email=user.email, hashed_password=fake_hashed_password)
+        email=user.email, password=hashed_password, username=user.username, )
 
     db.add(db_user)
 
@@ -48,3 +51,8 @@ def get_player_by_user_all(db: Session, user_id: int):
 def get_player_by_username(db: Session, username: str):
     return db.query(models.Player).filter(
         models.Player.username == username).first()
+
+
+def hash_pw(pwd, salt):
+    return hashlib.pbkdf2_hmac(
+        'sha256', pwd.encode(), salt.encode(), 50000).hex()
