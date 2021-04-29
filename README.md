@@ -1,5 +1,5 @@
 # service
-Back end / service layer / Flask
+Back end / service layer / fastapi
 
 How to run the project 
 ``` 
