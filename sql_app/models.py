@@ -21,8 +21,6 @@ class Player(Base):
     id = Column(Integer, primary_key=True)
     full_name = Column(Text, nullable=False)
     username = Column(Text, unique=True)
-    pw_hash = Column(Text)
-    pw_salt = Column(Text)
     two_pointers = Column(Integer, default=0, nullable=False)
     missed_two_pointers = Column(Integer, default=0, nullable=False)
     three_pointers = Column(Integer, default=0, nullable=False)
