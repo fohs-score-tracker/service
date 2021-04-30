@@ -38,7 +38,7 @@ def add_score(player_id: int, value: int, db: Session = Depends(get_db)):
 
 @app.post("/player/new/", response_model=schemas.Player)
 def create_player(Player: schemas.PlayerCreate, db: Session = Depends(get_db)):
-    db_player = crud.does_player_exist(db, username=Player.username)
+    db_player = crud.get_player_by_username(db, Player.username)
     if db_player:
         raise HTTPException(status_code=404, detail="Player not found")
     return create_player(db, Player)

@@ -52,7 +52,7 @@ def get_player_by_username(db: Session, username: str):
         models.Player.username == username).first()
 
 
-def add_score_to_player(db: Session, player, score: int):
+def add_score_to_player(db: Session, player:models.Player, score: int):
     player.two_pointers += score
     db.add(player)
     db.commit()
@@ -60,21 +60,18 @@ def add_score_to_player(db: Session, player, score: int):
     return db_user
 
 
-def does_player_exist(db: Session, username: str):
-   return db.query(models.Player).filter(models.Player.username == username).first()
 
+#def create_player(db: Session, player: schemas.Player):
+ #   db_player = models.Player(
+#        full_name=player.full_name, username=player.username, two_pointers=player.two_pointers, three_pointers=player.three_pointers)
+ #   db.add(db_player)
 
-def create_player(db: Session, player: schemas.Player):
-    db_player = models.Player(
-        full_name=player.full_name, username=player.username, two_pointers=player.two_pointers, three_pointers=player.three_pointers)
-    db.add(db_player)
+ #   db.commit()
 
-    db.commit()
+#    db.refresh(db_player)
 
-    db.refresh(db_player)
-
-    return db_player
-
+#    return db_player
+#
 
 def hash_pw(pwd, salt):
     return hashlib.pbkdf2_hmac(

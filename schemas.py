@@ -30,13 +30,15 @@ class Player(PlayerBase):
 
 class UserBase(BaseModel):
     id: int
+    
 
 
 class UserCreate(UserBase):
+    username: str
     full_name: str
     password: str
     email: str
-    username: str
+    
     
 
 
