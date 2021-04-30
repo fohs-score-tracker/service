@@ -21,9 +21,8 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 def create_user(db: Session, user: schemas.UserCreate):
     salt = token_urlsafe()
     hashed_password = hash_pw(user.password, salt)
-    user
     db_user = models.User(
-        email=user.email, password=hashed_password, username=user.username, )
+        email=user.email, pw_hash=hashed_password, username=user.username, full_name=user.full_name)
 
     db.add(db_user)
 
@@ -36,7 +35,7 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 def get_player(db: Session, player_id: int):
     return db.query(models.Player).filter(
-        models.Player.id == player_id).first()
+        models.Player.username == player_id).first()
 
 
 def get_player_by_user_first(db: Session, user_id: int):
@@ -51,6 +50,30 @@ def get_player_by_user_all(db: Session, user_id: int):
 def get_player_by_username(db: Session, username: str):
     return db.query(models.Player).filter(
         models.Player.username == username).first()
+
+
+def add_score_to_player(db: Session, player, score: int):
+    player.two_pointers += score
+    db.add(player)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+def does_player_exist(db: Session, username: str):
+   return db.query(models.Player).filter(models.Player.username == username).first()
+
+
+def create_player(db: Session, player: schemas.Player):
+    db_player = models.Player(
+        full_name=player.full_name, username=player.username, two_pointers=player.two_pointers, three_pointers=player.three_pointers)
+    db.add(db_player)
+
+    db.commit()
+
+    db.refresh(db_player)
+
+    return db_player
 
 
 def hash_pw(pwd, salt):

@@ -14,7 +14,7 @@ class User(Base):
     full_name = Column(Text)
     pw_hash = Column(Text)
     pw_salt = Column(Text)
-
+   # Players = relationship("Player", back_populates="User")
 
 class Player(Base):
     __tablename__ = "players"
@@ -25,9 +25,4 @@ class Player(Base):
     missed_two_pointers = Column(Integer, default=0, nullable=False)
     three_pointers = Column(Integer, default=0, nullable=False)
     missed_three_pointers = Column(Integer, default=0, nullable=False)
-    user_id = Column(
-        Integer,
-        ForeignKey('user.id'),
-        nullable=False)
-    user = relationship('User',
-                        backref=backref('players', lazy=True))
+  #  User = relationship("User", back_populates="Players")

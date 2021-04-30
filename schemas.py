@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class PlayerBase(BaseModel):
-    pass
+    id:int
 
 
 class PlayerCreate(PlayerBase):
@@ -20,7 +20,10 @@ class Player(PlayerBase):
     id: int
     username: str
     full_name: str
-
+    two_pointers: int
+    missed_two_pointers: int
+    three_pointers: int
+    missed_three_pointers: int
     class Config:
         orm_mode = True
 
@@ -33,6 +36,9 @@ class UserCreate(UserBase):
     full_name: str
     password: str
     email: str
+    username: str
+    
+
 
 
 class User(UserBase):
@@ -40,7 +46,6 @@ class User(UserBase):
     email: str
     username: str
     full_name: str
-    password: str
 
     class Config:
         orm_mode = True
