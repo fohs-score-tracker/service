@@ -24,3 +24,8 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def hash_pw(pwd, salt):
+    return hashlib.pbkdf2_hmac(
+        'sha256', pwd.encode(), salt.encode(), 50000).hex()
