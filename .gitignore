@@ -3,4 +3,4 @@ venv
 
 *.pyc
 __pycache__
-.vscode/
+.vscode

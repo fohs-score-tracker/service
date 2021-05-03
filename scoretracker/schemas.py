@@ -39,11 +39,14 @@ class UserCreate(BaseModel):
 
 class PlayerCreate(BaseModel):
     full_name: str
-    two_pointers: int
-    missed_two_pointers: int 
-    three_pointers: int 
-    missed_three_pointers: int
      
+    class Config:
+        orm_mode = True
+        schema_extra = {
+            "example": {
+                "full_name": "Jeff",
+            }
+        }
 
 class Player(BaseModel):
     id: int 
@@ -56,6 +59,7 @@ class Player(BaseModel):
         orm_mode = True
         schema_extra = {
             "example": {
+                "id": 1,
                 "full_name": "Jeff",
                 "two_pointers": 2,
                 "missed_two_pointers": 1,

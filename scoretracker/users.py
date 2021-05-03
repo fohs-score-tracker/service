@@ -45,7 +45,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
         db.commit()
 
 
-@ router.post("/users/new", response_model=schemas.User,
+@router.post("/users/new", response_model=schemas.User,
               status_code=201, response_description="New User", summary="Create a new user")
 def new_user(user: schemas.UserCreate,
              db: Session = Depends(get_db)):
