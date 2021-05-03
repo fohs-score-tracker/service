@@ -4,7 +4,7 @@ User management
 
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.security import HTTPBasicCredentials
 
 from . import schemas
@@ -43,10 +43,11 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     else:
         db.delete(user)
         db.commit()
+    return Response(status_code=204)
 
 
-@ router.post("/users/new", response_model=schemas.User,
-              status_code=201, response_description="New User", summary="Create a new user")
+@router.post("/users/new", response_model=schemas.User,
+             status_code=201, response_description="New User", summary="Create a new user")
 def new_user(user: schemas.UserCreate,
              db: Session = Depends(get_db)):
     user = create_user(db, user)
