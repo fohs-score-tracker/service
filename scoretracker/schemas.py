@@ -5,13 +5,12 @@ Pydantic models.
 from pydantic import BaseModel
 
 
-class User(BaseModel):
+class UserProfile(BaseModel):
     full_name: str
     email: str
     id: int
 
     class Config:
-        orm_mode = True
         schema_extra = {
             "example": {
                 "full_name": "Jeff",
@@ -21,13 +20,16 @@ class User(BaseModel):
         }
 
 
+class User(UserProfile):
+    password: str
+
+
 class UserCreate(BaseModel):
     full_name: str
     email: str
     password: str
 
     class Config:
-        orm_mode = True
         schema_extra = {
             "example": {
                 "full_name": "Jeff",
@@ -39,24 +41,24 @@ class UserCreate(BaseModel):
 
 class PlayerCreate(BaseModel):
     full_name: str
-     
+
     class Config:
-        orm_mode = True
         schema_extra = {
             "example": {
                 "full_name": "Jeff",
             }
         }
 
+
 class Player(BaseModel):
-    id: int 
+    id: int
     full_name: str
-    two_pointers: int 
-    missed_two_pointers: int 
-    three_pointers: int 
-    missed_three_pointers: int
+    two_pointers = 0
+    missed_two_pointers = 0
+    three_pointers = 0
+    missed_three_pointers = 0
+
     class Config:
-        orm_mode = True
         schema_extra = {
             "example": {
                 "id": 1,
@@ -65,6 +67,4 @@ class Player(BaseModel):
                 "missed_two_pointers": 1,
                 "three_pointers": 5,
                 "missed_three_pointers": 3}
-            }
-        
-
+        }

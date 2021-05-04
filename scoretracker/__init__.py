@@ -1,17 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import users, players
-from .db import Base, engine
-
-Base.metadata.create_all(bind=engine)
-
+from . import players, users
 
 app = FastAPI(title="ScoreTracker", version="0.0.0", openapi_tags=[
     {
         "name": "Users",
         "description": "Operations involving user accounts",
     },
+    {
+        "name": "Players",
+        "description": "Operations involving players"
+    }
 ])
 
 app.add_middleware(
