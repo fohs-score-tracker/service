@@ -11,6 +11,4 @@ uvicorn scoretracker:app
 
 Environment variables are used for configuration (which can also be set in `.env`)
 
-Supported variables:
-
-- `DATABASE_URL`: The url of the SQL Database to connect to (example: `sqlite:///example.db`)
+Supported variables can be found in the `Settings` object inside `scoretracker/utils.py`.
