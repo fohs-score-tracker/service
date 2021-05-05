@@ -12,6 +12,7 @@ class UserProfile(BaseModel):
 
     class Config:
         schema_extra = {
+            "title": "User",
             "example": {
                 "full_name": "Jeff",
                 "id": 1,
@@ -31,6 +32,7 @@ class UserCreate(BaseModel):
 
     class Config:
         schema_extra = {
+            "title": "New User",
             "example": {
                 "full_name": "Jeff",
                 "password": "123456",
@@ -44,6 +46,7 @@ class PlayerCreate(BaseModel):
 
     class Config:
         schema_extra = {
+            "title": "New Player",
             "example": {
                 "full_name": "Jeff",
             }
@@ -66,5 +69,6 @@ class Player(BaseModel):
                 "two_pointers": 2,
                 "missed_two_pointers": 1,
                 "three_pointers": 5,
-                "missed_three_pointers": 3}
+                "missed_three_pointers": 3
+            }
         }
