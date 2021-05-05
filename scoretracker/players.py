@@ -17,7 +17,7 @@ router = APIRouter(tags=["Players"])
 @router.get("/players",
             response_model=List[schemas.Player], summary="List all players")
 def list_players(redis: Redis = Depends(get_redis)):
-    return [redis.hgetall(key) for key in redis.keys("player:*")]
+    return [redis.hgetall(key) for key in redis.scan_iter("player:*")]
 
 
 @router.get("/players/{player_id}",
