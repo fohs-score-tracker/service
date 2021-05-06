@@ -2,13 +2,13 @@
 Pydantic models.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, conint
 
 
 class UserProfile(BaseModel):
     full_name: str
     email: str
-    id: int
+    id: conint(gt=0)
 
     class Config:
         schema_extra = {
@@ -35,7 +35,7 @@ class UserCreate(BaseModel):
             "title": "New User",
             "example": {
                 "full_name": "Jeff",
-                "password": "123456",
+                "password": "********",
                 "email": "jeff@localhost"
             }
         }
@@ -54,12 +54,12 @@ class PlayerCreate(BaseModel):
 
 
 class Player(BaseModel):
-    id: int
+    id: conint(gt=0)
     full_name: str
-    two_pointers = 0
-    missed_two_pointers = 0
-    three_pointers = 0
-    missed_three_pointers = 0
+    two_pointers: conint(ge=0) = 0
+    missed_two_pointers: conint(ge=0) = 0
+    three_pointers: conint(ge=0) = 0
+    missed_three_pointers: conint(ge=0) = 0
 
     class Config:
         schema_extra = {
