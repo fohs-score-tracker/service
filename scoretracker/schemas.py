@@ -2,12 +2,12 @@
 Pydantic models.
 """
 
-from pydantic import BaseModel, conint
+from pydantic import BaseModel, EmailStr, conint
 
 
 class UserProfile(BaseModel):
     full_name: str
-    email: str
+    email: EmailStr
     id: conint(gt=0)
 
     class Config:
@@ -27,7 +27,7 @@ class User(UserProfile):
 
 class UserCreate(BaseModel):
     full_name: str
-    email: str
+    email: EmailStr
     password: str
 
     class Config:
