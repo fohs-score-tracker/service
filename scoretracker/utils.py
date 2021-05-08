@@ -5,7 +5,6 @@ Utility functions.
 from typing import Optional
 
 from pydantic import BaseSettings, RedisDsn
-from redis import Redis
 
 
 class Settings(BaseSettings):
