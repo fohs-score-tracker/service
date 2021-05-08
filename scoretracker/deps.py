@@ -22,11 +22,7 @@ def get_settings() -> Settings:
 @lru_cache
 def get_redis() -> Redis:
     settings = get_settings()
-    return Redis(
-        host=settings.REDIS_HOST,
-        port=settings.REDIS_PORT,
-        db=settings.REDIS_DB,
-        password=settings.REDIS_PASSWORD,
-        username=settings.REDIS_USERNAME,
-        decode_responses=True
-    )
+    if settings.REDIS_URL is None:
+        return Redis(decode_responses=True)
+    else:
+        return Redis.from_url(settings.REDIS_URL, decode_responses=True)
