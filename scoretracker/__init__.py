@@ -15,7 +15,7 @@ app = FastAPI(title="ScoreTracker", version="0.0.0", openapi_tags=[
 
     {
 
-        "name": "teams",
+        "name": "Teams",
         "description": "Operations involving teams"
 
 
