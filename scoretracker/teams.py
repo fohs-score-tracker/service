@@ -15,10 +15,12 @@ router = APIRouter(tags=["Teams"])
 def new_team(data: schemas.TeamCreate, redis: Redis = Depends(get_redis)):
     team = schemas.Team(id=redis.incr("next_team_id"), **data.dict())
     current_team = f"team:{team.id}"
-    redis.set(current_team, "exist")
+    redis.sadd("teams", team.id)
     redis.set(current_team + ":name", team.name)
-    redis.sadd(current_team + ":roster", *team.players)
-    redis.sadd(current_team + ":coach", *team.coach)
+    if team.players:
+        redis.sadd(current_team + ":players", *team.players)
+    if team.coaches:
+        redis.sadd(current_team + ":coaches", *team.coaches)
 
     return team
 
@@ -27,15 +29,12 @@ def new_team(data: schemas.TeamCreate, redis: Redis = Depends(get_redis)):
             summary="Lookup by id", responses={404: {"description": "Team does not exist"}})
 def get_team(team_id: int, redis: Redis = Depends(get_redis)):
     current_team = f"team:{team_id}"
-    team = redis.get(current_team)
-    if team != "exist":
+    if not redis.sismember("teams", team_id):
         raise HTTPException(404)
-    else:
-        x = schemas.Team(
-            id=team_id,
-            name=redis.get(f"{current_team}:name"),
-            players=redis.lrange(
-                f"{current_team}:roster",
-                0,
-                -1), coach=redis.lrange(f"{current_team}:coach"))
-        return x
+
+    return schemas.Team(
+        id=team_id,
+        name=redis.get(f"{current_team}:name"),
+        players=redis.smembers(f"{current_team}:players"),
+        coaches=redis.smembers(f"{current_team}:coaches"),
+    )
