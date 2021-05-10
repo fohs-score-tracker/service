@@ -76,13 +76,13 @@ class Player(BaseModel):
 
 
 class TeamCreate(BaseModel):
-    team_name: str
+    name: str
     players: List[int]
-    Coach: List[int]
+    coach: List[int]
 
 
 class Team(BaseModel):
     id: conint(gt=0)
-    team_name: str
+    name: str
     players: List[int]
-    Coach: List[int]
+    coach: List[int]
