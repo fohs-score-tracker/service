@@ -77,12 +77,18 @@ class Player(BaseModel):
 
 class TeamCreate(BaseModel):
     name: str
-    players: List[int]
-    coach: List[int]
+    players: List[conint(gt=0)] = []
+    coaches: List[conint(gt=0)] = []
+    class config:
+        schema_extra = {
+             "title": "New Team",
+             "example": { "name": "Home Team"
+              }
+            }
 
 
 class Team(BaseModel):
     id: conint(gt=0)
     name: str
-    players: List[int]
-    coach: List[int]
+    coaches: List[conint(gt=0)]
+    players: List[conint(gt=0)]
