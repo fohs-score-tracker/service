@@ -1,6 +1,7 @@
 """
 Pydantic models.
 """
+from typing import List
 
 from pydantic import BaseModel, EmailStr, conint
 
@@ -72,3 +73,24 @@ class Player(BaseModel):
                 "missed_three_pointers": 3
             }
         }
+
+
+class TeamCreate(BaseModel):
+    name: str
+    players: List[conint(gt=0)] = []
+    coaches: List[conint(gt=0)] = []
+
+    class Config:
+        schema_extra = {
+            "title": "New Team",
+            "example": {
+                "name": "Home Team"
+            }
+        }
+
+
+class Team(BaseModel):
+    id: conint(gt=0)
+    name: str
+    coaches: List[conint(gt=0)]
+    players: List[conint(gt=0)]
