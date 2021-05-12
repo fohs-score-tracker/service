@@ -24,6 +24,16 @@ def new_team(data: schemas.TeamCreate, redis: Redis = Depends(get_redis)):
     return team.convert(redis)
 
 
+@router.get("/teams",
+            response_model=List[schemas.TeamList], summary="Get a list of all teams")
+def all_teams(redis: Redis = Depends(get_redis)):
+    return [schemas.Team(id=team_id,
+                         name=redis.get(f"team:{team_id}:name"),
+                         players=redis.smembers(f"team:{team_id}:players"),
+                         coaches=redis.smembers(f"team:{team_id}:coaches"))
+            .convert(redis) for team_id in redis.smembers("teams")]
+
+
 @router.get("/teams/{team_id}", response_model=schemas.TeamList,
             summary="Lookup by id", responses={404: {"description": "Team does not exist"}})
 def get_team(team_id: int, redis: Redis = Depends(get_redis)):
