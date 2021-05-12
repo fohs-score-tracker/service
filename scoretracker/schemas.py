@@ -3,9 +3,10 @@ Pydantic models.
 """
 from __future__ import annotations
 
-from typing import List
+from datetime import date
+from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, conint
+from pydantic import BaseModel, EmailStr, Field, conint
 from redis import Redis
 
 
@@ -100,8 +101,15 @@ class Team(BaseModel):
     coaches: List[conint(gt=0)]
     players: List[conint(gt=0)]
 
-    def convert(self, redis: Redis) -> TeamList:
-        return TeamList(
+    @classmethod
+    def find(cls, redis: Redis, team_id: int):
+        return cls(id=team_id,
+                   name=redis.get(f"team:{team_id}:name"),
+                   players=redis.smembers(f"team:{team_id}:players"),
+                   coaches=redis.smembers(f"team:{team_id}:coaches"))
+
+    def convert(self, redis: Redis) -> TeamResult:
+        return TeamResult(
             id=self.id,
             name=self.name,
             players=[redis.hgetall(f"player:{p}") for p in self.players],
@@ -109,18 +117,80 @@ class Team(BaseModel):
         )
 
 
-class TeamList(BaseModel):
+class TeamResult(BaseModel):
     id: conint(gt=0)
     name: str
     coaches: List[UserProfile]
     players: List[Player]
 
+    @classmethod
+    def find(cls, redis: Redis, team_id: int):
+        return Team.find(redis, team_id).convert(redis)
+
     class Config:
         schema_extra = {
+            "title": "Team",
             "example": {
                 "id": 1,
                 "name": "Home Team",
-                "players": [Player.Config.schema_extra],
-                "coaches": [UserProfile.Config.schema_extra]
+                "players": [Player.Config.schema_extra["example"]],
+                "coaches": [UserProfile.Config.schema_extra["example"]]
+            }
+        }
+
+
+class Game(BaseModel):
+    id: conint(gt=0)
+    team_id: conint(gt=0)
+    other_team: str
+    date: date
+
+    @staticmethod
+    def find(redis: Redis, game_id: int):
+        return Game(id=game_id,
+                    team_id=redis.get(f'game:{game_id}:team_id'),
+                    other_team=redis.get(f'game:{game_id}:other_team'),
+                    date=redis.get(f'game:{game_id}:date'))
+
+    def convert(self, redis: Redis):
+        return GameResult(id=self.id,
+                          team=TeamResult.find(redis, self.team_id),
+                          other_team=self.other_team,
+                          date=self.date)
+
+
+class GameResult(BaseModel):
+    id: conint(gt=0)
+    team: TeamResult
+    other_team: str
+    date: date
+
+    @staticmethod
+    def find(redis: Redis, game_id: int):
+        return Game.find(redis, game_id).convert(redis)
+
+    class Config:
+        schema_extra = {
+            "title": "Game",
+            "example": {
+                "id": 1,
+                "team": TeamResult.Config.schema_extra["example"],
+                "other_team": "Away Team",
+                "date": date.fromtimestamp(0)
+            }
+        }
+
+
+class GameCreate(BaseModel):
+    team_id: conint(gt=0)
+    other_team: str
+    date: Optional[date] = Field(default_factory=date.today)
+
+    class Config:
+        schema_extra = {
+            "title": "New Game",
+            "example": {
+                "team_id": 1,
+                "other_team": "Away Team"
             }
         }

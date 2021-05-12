@@ -1,20 +1,24 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import players, teams, users
+from . import games, players, teams, users
 
 app = FastAPI(title="ScoreTracker", version="0.0.0", openapi_tags=[
     {
         "name": "Users",
-        "description": "Operations involving user accounts",
+        "description": "Add user accounts",
     },
     {
         "name": "Players",
-        "description": "Operations involving players"
+        "description": "Register and manage players"
     },
     {
         "name": "Teams",
-        "description": "Operations involving teams"
+        "description": "Organize players in teams"
+    },
+    {
+        "name": "Games",
+        "description": "Record games"
     }
 ])
 
@@ -30,3 +34,4 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(players.router)
 app.include_router(teams.router)
+app.include_router(games.router)

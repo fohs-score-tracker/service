@@ -9,7 +9,7 @@ from .deps import get_redis
 router = APIRouter(tags=["Teams"])
 
 
-@router.post("/teams/new", response_model=schemas.TeamList, status_code=201,
+@router.post("/teams/new", response_model=schemas.TeamResult, status_code=201,
              response_description="New Team", summary="Create a new team")
 def new_team(data: schemas.TeamCreate, redis: Redis = Depends(get_redis)):
     team = schemas.Team(id=redis.incr("next_team_id"), **data.dict())
@@ -25,31 +25,22 @@ def new_team(data: schemas.TeamCreate, redis: Redis = Depends(get_redis)):
 
 
 @router.get("/teams",
-            response_model=List[schemas.TeamList], summary="Get a list of all teams")
+            response_model=List[schemas.TeamResult], summary="Get a list of all teams")
 def all_teams(redis: Redis = Depends(get_redis)):
-    return [schemas.Team(id=team_id,
-                         name=redis.get(f"team:{team_id}:name"),
-                         players=redis.smembers(f"team:{team_id}:players"),
-                         coaches=redis.smembers(f"team:{team_id}:coaches"))
-            .convert(redis) for team_id in redis.smembers("teams")]
+    return [schemas.TeamResult.find(redis, team_id)
+            for team_id in redis.smembers("teams")]
 
 
-@router.get("/teams/{team_id}", response_model=schemas.TeamList,
+@router.get("/teams/{team_id}", response_model=schemas.TeamResult,
             summary="Lookup by id", responses={404: {"description": "Team does not exist"}})
 def get_team(team_id: int, redis: Redis = Depends(get_redis)):
     if not redis.sismember("teams", team_id):
         raise HTTPException(404)
 
-    prefix = f"team:{team_id}"
-    return schemas.Team(
-        id=team_id,
-        name=redis.get(f"{prefix}:name"),
-        players=redis.smembers(f"{prefix}:players"),
-        coaches=redis.smembers(f"{prefix}:coaches")
-    ).convert(redis)
+    return schemas.TeamResult.find(redis, team_id)
 
 
-@router.patch("/teams/{team_id}", response_model=schemas.TeamList,
+@router.patch("/teams/{team_id}", response_model=schemas.TeamResult,
               summary="Edit by id", responses={404: {"description": "Team does not exist"}})
 def edit_team(team_id: int, data: schemas.TeamCreate,
               redis: Redis = Depends(get_redis)):
