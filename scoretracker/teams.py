@@ -39,6 +39,28 @@ def get_team(team_id: int, redis: Redis = Depends(get_redis)):
     ).convert(redis)
 
 
+@router.patch("/teams/{team_id}", response_model=schemas.TeamList,
+              summary="Edit by id", responses={404: {"description": "Team does not exist"}})
+def edit_team(team_id: int, data: schemas.TeamCreate,
+              redis: Redis = Depends(get_redis)):
+    if not redis.sismember("teams", team_id):
+        raise HTTPException(404)
+    team = schemas.Team(id=team_id, **data.dict())
+    prefix = f"team:{team_id}"
+
+    # clear lists before adding
+    redis.delete(f"{prefix}:players")
+    redis.delete(f"{prefix}:coaches")
+
+    redis.set(f"{prefix}:name", team.name)
+    if team.players:
+        redis.sadd(f"{prefix}:players", *team.players)
+    if team.coaches:
+        redis.sadd(f"{prefix}:coaches", *team.coaches)
+
+    return team.convert(redis)
+
+
 @router.delete("/teams/{team_id}", status_code=204, responses={404: {"description": "Team does not exist"},
                                                                204: {"description": "Team was successfully deleted"}}, summary="Delete a team with id")
 def delete_team(team_id: int, redis: Redis = Depends(get_redis)):
