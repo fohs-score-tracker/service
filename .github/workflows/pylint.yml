@@ -19,4 +19,4 @@ jobs:
         pip install -r requirements.txt
     - name: Analysing the code with pylint
       run: |
-        pylint scoretracker
+        pylint --fail-under=5 scoretracker
