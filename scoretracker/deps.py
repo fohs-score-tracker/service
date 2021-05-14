@@ -10,7 +10,6 @@ basic = HTTPBasic()
 
 
 def basic_auth(auth: HTTPBasicCredentials = Depends(basic)):
-    # TODO: validate
     return auth
 
 

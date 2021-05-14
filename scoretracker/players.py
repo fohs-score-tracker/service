@@ -5,11 +5,10 @@ Player management
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Response
-from fastapi.security import HTTPBasicCredentials
 from redis import Redis
 
 from . import schemas
-from .deps import basic_auth, get_redis
+from .deps import get_redis
 
 router = APIRouter(tags=["Players"])
 
