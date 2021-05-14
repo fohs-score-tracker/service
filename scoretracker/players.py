@@ -48,3 +48,15 @@ def new_player(data: schemas.PlayerCreate,
     player = schemas.Player(id=redis.incr("next_player_id"), **data.dict())
     redis.hmset(f"player:{player.id}", player.dict())
     return player
+
+
+@router.post("/players/{player_id}/edit/twopointers/{score}", response_model=schemas.Player,
+             status_code=200, response_description="Edit player", summary="Edit a player")
+def edit_player(player_id: int, score: int, redis: Redis = Depends(get_redis)):
+    if not redis.exists(f"player:{player_id}"):
+        raise HTTPException(404)
+    player = redis.hgetall(f"player:{player_id}")
+    x = schemas.Player(**player)
+    x.two_pointers += score
+    redis.hmset(f"player:{x.id}", x.dict())
+    return x
