@@ -1,2 +1,3 @@
 [MASTER]
 extension-pkg-whitelist=pydantic
+disable=too-few-public-methods, missing-class-docstring, missing-function-docstring, missing-module-docstring
