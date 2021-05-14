@@ -24,10 +24,9 @@ def list_players(redis: Redis = Depends(get_redis)):
             response_model=schemas.Player, summary="Lookup by id", responses={404: {"description": "Player does not exist"}})
 def find_player(player_id: int, redis: Redis = Depends(get_redis)):
     player = redis.hgetall(f'player:{player_id}')
-    if player:
-        return player
-    else:
+    if not player:
         raise HTTPException(404)
+    return player
 
 
 @router.delete("/players/{player_id}", status_code=204,
@@ -36,8 +35,7 @@ def delete_player(player_id: int, redis: Redis = Depends(get_redis)):
     key = f'player:{player_id}'
     if not redis.exists(key):
         raise HTTPException(404)
-    else:
-        redis.delete(key)
+    redis.delete(key)
     return Response(status_code=204)
 
 
@@ -55,11 +53,11 @@ def new_player(data: schemas.PlayerCreate,
 def edit_player(player_id: int, score: int, redis: Redis = Depends(get_redis)):
     if not redis.exists(f"player:{player_id}"):
         raise HTTPException(404)
-    player = redis.hgetall(f"player:{player_id}")
-    x = schemas.Player(**player)
-    x.two_pointers += score
-    redis.hmset(f"player:{x.id}", x.dict())
-    return x
+    player_data = redis.hgetall(f"player:{player_id}")
+    player = schemas.Player(**player_data)
+    player.two_pointers += score
+    redis.hmset(f"player:{player.id}", player.dict())
+    return player
 
 
 @router.patch("/players/{player_id}/edit/missedtwopointers/{score}", response_model=schemas.Player,
@@ -68,8 +66,8 @@ def edit_missed_two_pointers(player_id: int, score: int,
                              redis: Redis = Depends(get_redis)):
     if not redis.exists(f"player:{player_id}"):
         raise HTTPException(404)
-    x = redis.hgetall(F"player:{player_id}")
-    player = schemas.Player(**x)
+    player_data = redis.hgetall(F"player:{player_id}")
+    player = schemas.Player(**player_data)
     player.missed_two_pointers += score
     redis.hmset(f"player:{player.id}", player.dict())
     return player
@@ -81,8 +79,8 @@ def edit_three_pointers(player_id: int, score: int,
                         redis: Redis = Depends(get_redis)):
     if not redis.exists(f"player:{player_id}"):
         raise HTTPException(404)
-    x = redis.hgetall(f"player:{player_id}")
-    player = schemas.Player(**x)
+    player_data = redis.hgetall(f"player:{player_id}")
+    player = schemas.Player(**player_data)
     player.three_pointers += score
     redis.hmset(f"player:{player.id}", player.dict())
     return player
@@ -94,8 +92,8 @@ def edit_missed_three_pointers(
         player_id: int, score: int, redis: Redis = Depends(get_redis)):
     if not redis.exists(f"player:{player_id}"):
         raise HTTPException(404)
-    x = redis.hgetall(f"player:{player_id}")
-    player = schemas.Player(**x)
+    player_data = redis.hgetall(f"player:{player_id}")
+    player = schemas.Player(**player_data)
     player.missed_three_pointers += score
     redis.hmset(f"player:{player.id}", player.dict())
     return player
