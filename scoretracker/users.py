@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from redis import Redis
 
 from . import schemas
-from .deps import get_redis
+from .deps import get_current_user, get_redis
 
 router = APIRouter(tags=["Users"])
 
@@ -18,6 +18,11 @@ router = APIRouter(tags=["Users"])
 )
 def list_users(redis: Redis = Depends(get_redis)):
     return [redis.hgetall(key) for key in redis.scan_iter("user:*")]
+
+
+@router.get("/users/me", response_model=schemas.User)
+def logged_in_user(current_user: schemas.User = Depends(get_current_user)):
+    return current_user
 
 
 @router.get(
