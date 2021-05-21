@@ -18,7 +18,7 @@ app = FastAPI(
 )
 
 origins = [
-    "ttps://fohs-score-tracker.github.io",
+    "https://fohs-score-tracker.github.io",
     "http://localhost",
     "http://localhost:8080",
 ]
