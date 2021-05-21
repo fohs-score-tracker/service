@@ -17,16 +17,10 @@ app = FastAPI(
     ],
 )
 
-origins = [
-    "https://fohs-score-tracker.github.io",
-    "http://localhost",
-    "http://localhost:8080",
-]
-
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
