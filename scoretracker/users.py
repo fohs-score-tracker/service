@@ -20,7 +20,7 @@ def list_users(redis: Redis = Depends(get_redis)):
     return [redis.hgetall(key) for key in redis.scan_iter("user:*")]
 
 
-@router.get("/users/me", response_model=schemas.User)
+@router.get("/users/me", response_model=schemas.UserProfile)
 def logged_in_user(current_user: schemas.User = Depends(get_current_user)):
     return current_user
 
