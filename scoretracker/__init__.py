@@ -15,6 +15,7 @@ app = FastAPI(
         {"name": "Teams", "description": "Organize players in teams"},
         {"name": "Games", "description": "Record games"},
     ],
+    docs_url="/",
 )
 
 app.add_middleware(
