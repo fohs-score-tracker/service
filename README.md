@@ -194,7 +194,7 @@ Project Link: [https://github.com/fohs-score-tracker/service](https://github.com
 
 
 
-   * 👤 **Phillip Hodges**
+ * 👤 **Phillip Hodges**
      - Github: [@phodges7727](https://github.com/phodges7727)
 
 
