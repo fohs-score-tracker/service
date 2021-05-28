@@ -188,13 +188,15 @@ Project Link: [https://github.com/fohs-score-tracker/service](https://github.com
 
 <!-- ACKNOWLEDGEMENTS -->
 ##  Acknowledgements / Thanks
+* 👤 **DaShaun Carter**
+     - Github: [@dashaun](https://github.com/dashaun)
+     - Twitter : [@dashaun](https://twitter.com/dashaun/)
+
+
 
    * 👤 **Phillip Hodges**
      - Github: [@phodges7727](https://github.com/phodges7727)
 
-* 👤 **DaShaun Carter**
-     - Github: [@dashaun](https://github.com/dashaun)
-     - Twitter : [@dashaun](https://twitter.com/dashaun/)
 
 
 
