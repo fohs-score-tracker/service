@@ -12,6 +12,3 @@ class Settings(BaseSettings):
         env_file = ".env"
 
     REDIS_URL: Optional[RedisDsn] = None
-
-    # internal use only
-    SCORETRACKER_TESTING_MODE: bool = False

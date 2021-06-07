@@ -2,18 +2,14 @@ import pytest
 from fakeredis import FakeRedis
 from fastapi.testclient import TestClient
 from scoretracker import app
-from scoretracker.deps import get_redis, get_settings
+from scoretracker.deps import get_redis
 
-settings = get_settings()
-
-# the settings object is cached so this will affect all future requests
-settings.SCORETRACKER_TESTING_MODE = True
+fake_redis = FakeRedis(decode_responses=True)
+app.dependency_overrides[get_redis] = lambda: fake_redis
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def client() -> TestClient:
     """A FastAPI test client."""
-    fake_db = get_redis()
-    assert isinstance(fake_db, FakeRedis)  # just making sure
-    yield TestClient(app)
-    fake_db.flushall()
+    fake_redis.flushdb()
+    return TestClient(app)

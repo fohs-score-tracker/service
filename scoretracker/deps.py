@@ -1,6 +1,5 @@
 from functools import lru_cache
 
-from fakeredis import FakeRedis
 from fastapi import Depends
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -20,8 +19,6 @@ def get_settings() -> Settings:
 @lru_cache
 def get_redis() -> Redis:
     settings = get_settings()
-    if settings.SCORETRACKER_TESTING_MODE:
-        return FakeRedis(decode_responses=True)
     if settings.REDIS_URL is None:
         return Redis(decode_responses=True)
     return Redis.from_url(settings.REDIS_URL, decode_responses=True)
