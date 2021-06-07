@@ -64,5 +64,5 @@ def delete_user(user_id: int, redis: Redis = Depends(get_redis)):
 )
 def new_user(data: schemas.UserCreate, redis: Redis = Depends(get_redis)):
     user = schemas.User(id=redis.incr("next_user_id"), **data.dict())
-    redis.hmset(f"user:{user.id}", user.dict())
+    redis.hset(f"user:{user.id}", mapping=user.dict())
     return user

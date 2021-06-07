@@ -134,9 +134,11 @@ This is an example of how to list things you need to use the software and how to
 
     Example config file: 
 
-    ```
+    ```sh
     REDIS_URL="redis://user:password@server/db"
     ```
+
+    ℹ The database provided by the `REDIS_URL` variable is **not** used for testing.
 
 
 <!-- USAGE EXAMPLES -->
