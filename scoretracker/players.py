@@ -5,6 +5,7 @@ Player management
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from pydantic import conint
 from redis import Redis
 
 from . import schemas
@@ -26,7 +27,7 @@ def list_players(redis: Redis = Depends(get_redis)):
     summary="Lookup by id",
     responses={404: {"description": "Player does not exist"}},
 )
-def find_player(player_id: int, redis: Redis = Depends(get_redis)):
+def find_player(player_id: conint(gt=0), redis: Redis = Depends(get_redis)):
     if not redis.sismember("players", player_id):
         raise HTTPException(404)
     return schemas.PlayerResult.find(redis, player_id)
@@ -41,7 +42,7 @@ def find_player(player_id: int, redis: Redis = Depends(get_redis)):
     },
     summary="Delete a player with id",
 )
-def delete_player(player_id: int, redis: Redis = Depends(get_redis)):
+def delete_player(player_id: conint(gt=0), redis: Redis = Depends(get_redis)):
     if not redis.sismember("players", player_id):
         raise HTTPException(404)
     prefix = f"player:{player_id}"
@@ -74,7 +75,7 @@ def new_player(data: schemas.PlayerCreate, redis: Redis = Depends(get_redis)):
     responses={404: {"description": "Player does not exist"}},
 )
 def add_shot(
-    player_id: int, data: schemas.ShotCreate, redis: Redis = Depends(get_redis)
+    player_id: conint(gt=0), data: schemas.ShotCreate, redis: Redis = Depends(get_redis)
 ):
     if not redis.sismember("players", player_id):
         raise HTTPException(404)
@@ -92,7 +93,9 @@ def add_shot(
     response_model=schemas.PlayerResult,
     response_description="Player with shot removed",
 )
-def delete_shot(player_id: int, shot_id: int, redis: Redis = Depends(get_redis)):
+def delete_shot(
+    player_id: conint(gt=0), shot_id: int, redis: Redis = Depends(get_redis)
+):
     if not redis.sismember(f"player:{player_id}:shots", shot_id):
         raise HTTPException(404)
     schemas.Shot.delete(redis, shot_id)
@@ -107,7 +110,11 @@ def delete_shot(player_id: int, shot_id: int, redis: Redis = Depends(get_redis))
     response_description="Edited player",
 )
 def edit_player(
-    player_id: int, data: schemas.PlayerCreate, redis: Redis = Depends(get_redis)
+    player_id: conint(gt=0),
+    data: schemas.PlayerCreate,
+    redis: Redis = Depends(get_redis),
 ):
+    if not redis.sismember("players", player_id):
+        raise HTTPException(404)
     redis.set(f"player:{player_id}:name", data.name)
     return schemas.PlayerResult.find(redis, player_id)
