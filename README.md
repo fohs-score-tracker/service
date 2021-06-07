@@ -25,6 +25,7 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
+![GitHub Workflow Status][test-shield]
 
 
 
@@ -217,4 +218,5 @@ Project Link: [https://github.com/fohs-score-tracker/service](https://github.com
 [issues-url]: https://github.com/fohs-score-tracker/service/issues
 [license-shield]: https://img.shields.io/github/license/fohs-score-tracker/service.svg?style=for-the-badge
 [license-url]: https://github.com/fohs-score-tracker/service/blob/master/LICENSE.txt
+[test-shield]: https://img.shields.io/github/workflow/status/fohs-score-tracker/service/tests?label=tests&style=for-the-badge
 

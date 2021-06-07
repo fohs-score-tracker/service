@@ -4,3 +4,8 @@ venv
 *.pyc
 __pycache__
 .vscode
+
+# tests
+.pytest_cache
+.coverage
+.hypothesis
