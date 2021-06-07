@@ -13,3 +13,8 @@ def client() -> TestClient:
     """A FastAPI test client."""
     fake_redis.flushdb()
     return TestClient(app)
+
+
+@pytest.fixture()
+def redis():
+    return fake_redis

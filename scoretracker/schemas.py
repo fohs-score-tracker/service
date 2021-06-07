@@ -194,7 +194,7 @@ class TeamResult(BaseModel):
     id: conint(gt=0) = Field(..., example=1)
     name: str = Field(..., example="Home Team")
     coaches: List[UserProfile]
-    players: List[Player]
+    players: List[PlayerResult]
 
     @classmethod
     def find(cls, redis: Redis, team_id: int):
