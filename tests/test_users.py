@@ -42,7 +42,7 @@ def test_edit_and_list(client: TestClient):
     )
     assert response.status_code == 200 and response.json() == expected
 
-    assert client.get("/players").json() == [expected]
+    assert client.get("/users").json() == [expected]
 
 
 def test_remove_user(client: TestClient):

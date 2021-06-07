@@ -66,3 +66,23 @@ def new_user(data: schemas.UserCreate, redis: Redis = Depends(get_redis)):
     user = schemas.User(id=redis.incr("next_user_id"), **data.dict())
     redis.hset(f"user:{user.id}", mapping=user.dict())
     return user
+
+
+@router.patch(
+    "/users/{user_id}",
+    response_model=schemas.UserProfile,
+    responses={
+        404: {"description": "User does not exist"},
+        200: {"description": "Updated user"},
+    },
+    summary="Update user",
+)
+def update_user(
+    data: schemas.UserCreate, user_id: int, redis: Redis = Depends(get_redis)
+):
+    key = f"user:{user_id}"
+    if not redis.exists(key):
+        raise HTTPException(404, detail="User does not exist")
+    user = schemas.User(id=user_id, **data.dict())
+    redis.hset(key, mapping=user.dict())
+    return user
