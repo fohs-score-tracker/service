@@ -6,10 +6,11 @@ def test_list_empty(client: TestClient):
     assert response.status_code == 200 and response.json() == []
 
 
-def test_create_and_list(client: TestClient):
+def test_create_get_list(client: TestClient):
     expected1 = {"name": "First User", "id": 1, "email": "test1@example.com"}
     expected2 = {"name": "Second User", "id": 2, "email": "test2@example.com"}
 
+    # create
     response1 = client.post(
         "/users/new",
         json={"name": "First User", "email": "test1@example.com", "password": "a"},
@@ -22,9 +23,14 @@ def test_create_and_list(client: TestClient):
     )
     assert response2.status_code == 201 and response2.json() == expected2
 
-    response3 = client.get("/users")
-    assert response3.status_code == 200
-    user_list = response3.json()
+    # get
+    response3 = client.get("/users/1")
+    assert response3.status_code == 200 and response3.json() == expected1
+
+    # list
+    response4 = client.get("/users")
+    assert response4.status_code == 200
+    user_list = response4.json()
     assert len(user_list) == 2 and expected1 in user_list and expected2 in user_list
 
 
@@ -89,3 +95,29 @@ def test_login(client: TestClient):
         "email": "test@example.com",
         "id": 1,
     }
+
+
+def test_404(client: TestClient):
+    for response in (
+        client.get("/users/1"),
+        client.delete("/users/1"),
+        client.patch(
+            "/users/1", json={"email": "a@example.com", "password": "a", "name": "a"}
+        ),
+    ):
+        assert (
+            response.status_code == 404
+        ), f"{response.request.method} => {response.status_code}"
+
+
+def test_422(client: TestClient):
+    for response in (
+        client.get("/users/0"),
+        client.delete("/users/0"),
+        client.patch(
+            "/users/0", json={"email": "a@example.com", "password": "a", "name": "a"}
+        ),
+    ):
+        assert (
+            response.status_code == 422
+        ), f"{response.request.method} => {response.status_code}"

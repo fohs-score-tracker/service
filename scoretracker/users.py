@@ -5,6 +5,7 @@ User management
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from pydantic import conint
 from redis import Redis
 
 from . import schemas
@@ -31,7 +32,7 @@ def logged_in_user(current_user: schemas.User = Depends(get_current_user)):
     summary="Lookup by id",
     responses={404: {"description": "User does not exist"}},
 )
-def find_user(user_id: int, redis: Redis = Depends(get_redis)):
+def find_user(user_id: conint(gt=0), redis: Redis = Depends(get_redis)):
     user = redis.hgetall(f"user:{user_id}")
     if user:
         return user
@@ -47,7 +48,7 @@ def find_user(user_id: int, redis: Redis = Depends(get_redis)):
     },
     summary="Delete a user with id",
 )
-def delete_user(user_id: int, redis: Redis = Depends(get_redis)):
+def delete_user(user_id: conint(gt=0), redis: Redis = Depends(get_redis)):
     key = f"user:{user_id}"
     if not redis.exists(key):
         raise HTTPException(404)
@@ -78,7 +79,7 @@ def new_user(data: schemas.UserCreate, redis: Redis = Depends(get_redis)):
     summary="Update user",
 )
 def update_user(
-    data: schemas.UserCreate, user_id: int, redis: Redis = Depends(get_redis)
+    data: schemas.UserCreate, user_id: conint(gt=0), redis: Redis = Depends(get_redis)
 ):
     key = f"user:{user_id}"
     if not redis.exists(key):
