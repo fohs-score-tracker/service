@@ -80,7 +80,6 @@ def add_shot(
         raise HTTPException(404)
     shot_id = redis.incr("next_shot_id")
     for key, value in data.dict().items():
-        print(key, "=", value)
         redis.set(f"shot:{shot_id}:{key}", str(value))  # can't use bools
     redis.sadd(f"player:{player_id}:shots", shot_id)
     return schemas.PlayerResult.find(redis, player_id)
