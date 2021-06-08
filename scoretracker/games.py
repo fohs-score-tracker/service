@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import conint
 from redis import Redis
 
 from . import schemas
@@ -30,7 +31,7 @@ def new_game(data: schemas.GameCreate, redis: Redis = Depends(get_redis)):
 @router.get(
     "/games/{game_id}", summary="Get game by id", response_model=schemas.GameResult
 )
-def get_game(game_id: int, redis: Redis = Depends(get_redis)):
+def get_game(game_id: conint(gt=0), redis: Redis = Depends(get_redis)):
     if not redis.sismember("games", game_id):
         raise HTTPException(404)
     return schemas.GameResult.find(redis, game_id)

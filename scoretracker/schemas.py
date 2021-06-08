@@ -77,7 +77,7 @@ class Shot(BaseModel):
     missed: bool
 
     @classmethod
-    def find(cls, redis: Redis, shot_id: int):
+    def find(cls, redis: Redis, shot_id: conint(gt=0)):
         prefix = f"shot:{shot_id}"
         return cls(
             id=shot_id,
@@ -89,7 +89,7 @@ class Shot(BaseModel):
         )
 
     @classmethod
-    def delete(cls, redis: Redis, shot_id: int):
+    def delete(cls, redis: Redis, shot_id: conint(gt=0)):
         prefix = f"shot:{shot_id}"
         redis.delete(
             prefix + ":x",
@@ -109,6 +109,7 @@ class ShotResult(BaseModel):
     y: conint(ge=0, lt=50) = Field(..., example=25)
     points: conint(gt=0, le=3) = Field(..., example=1)  # 1, 2, or 3
     missed: bool
+    game_id: conint(gt=0)
 
     class Config:
         schema_extra = {
@@ -116,7 +117,7 @@ class ShotResult(BaseModel):
         }
 
     @classmethod
-    def find(cls, redis: Redis, shot_id: int):
+    def find(cls, redis: Redis, shot_id: conint(gt=0)):
         return Shot.find(redis, shot_id).convert()
 
 
@@ -126,7 +127,7 @@ class Player(BaseModel):
     shot_ids: List[conint(gt=0)]
 
     @classmethod
-    def find(cls, redis: Redis, player_id: int):
+    def find(cls, redis: Redis, player_id: conint(gt=0)):
         return cls(
             id=player_id,
             shot_ids=redis.smembers(f"player:{player_id}:shots"),
@@ -150,7 +151,7 @@ class PlayerResult(BaseModel):
     shots: List[ShotResult]
 
     @classmethod
-    def find(cls, redis: Redis, player_id: int):
+    def find(cls, redis: Redis, player_id: conint(gt=0)):
         return Player.find(redis, player_id).convert(redis)
 
 
@@ -173,7 +174,7 @@ class Team(BaseModel):
     players: List[conint(gt=0)]
 
     @classmethod
-    def find(cls, redis: Redis, team_id: int):
+    def find(cls, redis: Redis, team_id: conint(gt=0)):
         return cls(
             id=team_id,
             name=redis.get(f"team:{team_id}:name"),
@@ -197,7 +198,7 @@ class TeamResult(BaseModel):
     players: List[PlayerResult]
 
     @classmethod
-    def find(cls, redis: Redis, team_id: int):
+    def find(cls, redis: Redis, team_id: conint(gt=0)):
         return Team.find(redis, team_id).convert(redis)
 
     class Config:
@@ -213,7 +214,7 @@ class Game(BaseModel):
     date: date
 
     @staticmethod
-    def find(redis: Redis, game_id: int):
+    def find(redis: Redis, game_id: conint(gt=0)):
         return Game(
             id=game_id,
             team_id=redis.get(f"game:{game_id}:team_id"),
@@ -237,7 +238,7 @@ class GameResult(BaseModel):
     date: date
 
     @staticmethod
-    def find(redis: Redis, game_id: int):
+    def find(redis: Redis, game_id: conint(gt=0)):
         return Game.find(redis, game_id).convert(redis)
 
     class Config:

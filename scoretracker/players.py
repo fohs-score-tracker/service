@@ -72,14 +72,22 @@ def new_player(data: schemas.PlayerCreate, redis: Redis = Depends(get_redis)):
     response_model=schemas.PlayerResult,
     response_description="Player with new shot",
     summary="Record a player's shot",
-    responses={404: {"description": "Player does not exist"}},
+    responses={
+        404: {"description": "Player or game does not exist"},
+        201: {"description": "Shot was sucessfully added"},
+    },
+    status_code=201,
 )
 def add_shot(
-    player_id: conint(gt=0), data: schemas.ShotCreate, redis: Redis = Depends(get_redis)
+    player_id: conint(gt=0),
+    data: schemas.ShotCreate,
+    redis: Redis = Depends(get_redis),
 ):
     if not redis.sismember("players", player_id):
         raise HTTPException(404)
     shot_id = redis.incr("next_shot_id")
+    if not redis.sismember("games", data.game_id):
+        raise HTTPException(404, detail="Game does not exist")
     for key, value in data.dict().items():
         redis.set(f"shot:{shot_id}:{key}", str(value))  # can't use bools
     redis.sadd(f"player:{player_id}:shots", shot_id)
@@ -87,14 +95,13 @@ def add_shot(
 
 
 @router.delete(
-    "/players/{player_id}/{shot_id}",
-    status_code=201,
+    "/players/{player_id}/shots/{shot_id}",
     summary="Delete a player's shot",
     response_model=schemas.PlayerResult,
     response_description="Player with shot removed",
 )
 def delete_shot(
-    player_id: conint(gt=0), shot_id: int, redis: Redis = Depends(get_redis)
+    player_id: conint(gt=0), shot_id: conint(gt=0), redis: Redis = Depends(get_redis)
 ):
     if not redis.sismember(f"player:{player_id}:shots", shot_id):
         raise HTTPException(404)

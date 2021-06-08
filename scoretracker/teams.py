@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from pydantic import conint
 from redis import Redis
 
 from . import schemas
@@ -44,7 +45,7 @@ def all_teams(redis: Redis = Depends(get_redis)):
     summary="Lookup by id",
     responses={404: {"description": "Team does not exist"}},
 )
-def get_team(team_id: int, redis: Redis = Depends(get_redis)):
+def get_team(team_id: conint(gt=0), redis: Redis = Depends(get_redis)):
     if not redis.sismember("teams", team_id):
         raise HTTPException(404)
 
@@ -58,7 +59,7 @@ def get_team(team_id: int, redis: Redis = Depends(get_redis)):
     responses={404: {"description": "Team does not exist"}},
 )
 def edit_team(
-    team_id: int, data: schemas.TeamCreate, redis: Redis = Depends(get_redis)
+    team_id: conint(gt=0), data: schemas.TeamCreate, redis: Redis = Depends(get_redis)
 ):
     if not redis.sismember("teams", team_id):
         raise HTTPException(404)
@@ -87,7 +88,7 @@ def edit_team(
     },
     summary="Delete a team with id",
 )
-def delete_team(team_id: int, redis: Redis = Depends(get_redis)):
+def delete_team(team_id: conint(gt=0), redis: Redis = Depends(get_redis)):
     prefix = f"team:{team_id}"
     if not redis.sismember("teams", team_id):
         raise HTTPException(404)
