@@ -1,4 +1,5 @@
 ﻿appdirs==1.4.4
+asgiref==3.3.4
 astroid==2.5.6
 atomicwrites==1.4.0
 attrs==21.2.0
@@ -12,6 +13,7 @@ dnspython==2.1.0
 email-validator==1.1.2
 fakeredis==1.5.2
 fastapi==0.65.1
+h11==0.12.0
 idna==2.10
 iniconfig==1.1.1
 isort==5.8.0
@@ -36,4 +38,5 @@ starlette==0.14.2
 toml==0.10.2
 typing-extensions==3.10.0.0
 urllib3==1.26.5
+uvicorn==0.14.0
 wrapt==1.12.1
