@@ -50,6 +50,9 @@ def delete_player(player_id: conint(gt=0), redis: Redis = Depends(get_redis)):
         schemas.Shot.delete(redis, shot_id)
     redis.delete(prefix + ":shots", prefix + ":name")
     redis.srem("players", player_id)
+    for team_id in redis.smembers("teams"):
+        if redis.sismember(f"team:{team_id}:players", player_id):
+            redis.srem(f"team:{team_id}:players", player_id)
     return Response(status_code=204)
 
 

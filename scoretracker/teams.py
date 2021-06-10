@@ -23,8 +23,18 @@ def new_team(data: schemas.TeamCreate, redis: Redis = Depends(get_redis)):
     redis.sadd("teams", team.id)
     redis.set(prefix + ":name", team.name)
     if team.players:
+        for player_id in team.players:
+            if not redis.sismember("players", player_id):
+                raise HTTPException(
+                    404, detail=f"Player with ID {player_id} does not exist"
+                )
         redis.sadd(prefix + ":players", *team.players)
     if team.coaches:
+        for coach_id in team.coaches:
+            if not redis.exists(f"user:{coach_id}"):
+                raise HTTPException(
+                    404, detail=f"User with ID {coach_id} does not exist"
+                )
         redis.sadd(prefix + ":coaches", *team.coaches)
 
     return team.convert(redis)
@@ -72,8 +82,18 @@ def edit_team(
 
     redis.set(f"{prefix}:name", team.name)
     if team.players:
+        for player_id in team.players:
+            if not redis.sismember("players", player_id):
+                raise HTTPException(
+                    404, detail=f"Player with ID {player_id} does not exist"
+                )
         redis.sadd(f"{prefix}:players", *team.players)
     if team.coaches:
+        for coach_id in team.coaches:
+            if not redis.exists(f"user:{coach_id}"):
+                raise HTTPException(
+                    404, detail=f"User with ID {coach_id} does not exist"
+                )
         redis.sadd(f"{prefix}:coaches", *team.coaches)
 
     return team.convert(redis)

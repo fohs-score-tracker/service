@@ -53,6 +53,9 @@ def delete_user(user_id: conint(gt=0), redis: Redis = Depends(get_redis)):
     if not redis.exists(key):
         raise HTTPException(404)
     redis.delete(key)
+    for team_id in redis.smembers("teams"):
+        if redis.sismember(f"team:{team_id}:coaches", user_id):
+            redis.srem(f"team:{team_id}:coaches", user_id)
     return Response(status_code=204)
 
 
