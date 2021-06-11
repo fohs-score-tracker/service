@@ -1,23 +1,24 @@
+from datetime import timedelta
 from functools import lru_cache
 
 from fastapi import Depends
 from fastapi.exceptions import HTTPException
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.security.oauth2 import OAuth2PasswordBearer
 from redis import Redis
 
 from .schemas import User
 from .utils import Settings
 
-basic = HTTPBasic()
+oauth_schema = OAuth2PasswordBearer("/token")
 
 
 @lru_cache
-def get_settings() -> Settings:
+def get_settings() -> Settings:  # pragma: no cover
     return Settings()
 
 
 @lru_cache
-def get_redis() -> Redis:
+def get_redis() -> Redis:  # pragma: no cover
     settings = get_settings()
     if settings.REDIS_URL is None:
         return Redis(decode_responses=True)
@@ -25,12 +26,10 @@ def get_redis() -> Redis:
 
 
 def get_current_user(
-    creds: HTTPBasicCredentials = Depends(basic), redis: Redis = Depends(get_redis)
+    token: str = Depends(oauth_schema), redis: Redis = Depends(get_redis)
 ):
-    for key in redis.scan_iter("user:*"):
-        user = User.parse_obj(redis.hgetall(key))
-        if user.email == creds.username:
-            if user.password == creds.password:
-                return user
-            raise HTTPException(401, "Invalid password")
-    raise HTTPException(401, "User does not exist")
+    key = "token:" + token
+    if not redis.exists(key):
+        raise HTTPException(401, detail="Invalid or expired token")
+    redis.expire(key, timedelta(days=1))
+    return User.parse_obj(redis.hgetall(f"user:{redis.get(key)}"))

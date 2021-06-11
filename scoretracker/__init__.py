@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import games, players, teams, users
+from . import auth, games, players, teams, users
 
 app = FastAPI(
     title="ScoreTracker",
@@ -14,6 +14,7 @@ app = FastAPI(
         {"name": "Players", "description": "Register and manage players"},
         {"name": "Teams", "description": "Organize players in teams"},
         {"name": "Games", "description": "Record games"},
+        {"name": "Tokens", "description": "Request and revoke session tokens"},
     ],
     docs_url="/",
 )
@@ -31,3 +32,4 @@ app.include_router(users.router)
 app.include_router(players.router)
 app.include_router(teams.router)
 app.include_router(games.router)
+app.include_router(auth.router)
