@@ -25,12 +25,6 @@ def get_redis() -> Redis:  # pragma: no cover
     return Redis.from_url(settings.REDIS_URL, decode_responses=True)
 
 
-def get_send_grid(settings: Settings = Depends(get_settings)): 
-    settings = get_settings()
-    if settings.SENDGRID_API_KEY is not None:
-        return settings.SENDGRID_API_KEY
-    return None
-        
 
 
 
