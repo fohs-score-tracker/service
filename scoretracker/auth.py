@@ -84,3 +84,4 @@ def reset_password(
             raise HTTPException(400, "Invalid reset token")
         redis.hset(key, "password", password)
         return Response(status_code=204)
+    raise HTTPException(404, detail="User not found")
