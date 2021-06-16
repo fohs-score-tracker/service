@@ -42,6 +42,19 @@ class UserCreate(BaseModel):
         }
 
 
+
+class PasswordChange(BaseModel):
+    password: str
+
+    class Config:
+        schema_extra = {
+            "title": "Password Reset",
+            "example": {
+                "password": "********",
+            },
+        }
+
+
 class PlayerCreate(BaseModel):
     name: str
 

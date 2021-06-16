@@ -12,3 +12,5 @@ class Settings(BaseSettings):
         env_file = ".env"
 
     REDIS_URL: Optional[RedisDsn] = None
+    SENDGRID_API_KEY: Optional[str] = None
+
