@@ -2,12 +2,11 @@ from datetime import timedelta
 from secrets import token_urlsafe
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Response
-from fastapi.security import OAuth2PasswordRequestForm, oauth2
+from fastapi.security import OAuth2PasswordRequestForm
 from redis import Redis
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
-from . import schemas
 from .deps import Settings, get_redis, get_settings, oauth_schema
 
 router = APIRouter(tags=["Tokens"])
@@ -35,39 +34,52 @@ def logout(token: str = Depends(oauth_schema), redis: Redis = Depends(get_redis)
     return Response(status_code=204)
 
 
-@router.post("/users/{email}/reset")
-def password_reset(
+@router.post(
+    "/reset/{email}", summary="Request a password reset token", status_code=204
+)
+def get_reset_token(
     email: str,
     redis: Redis = Depends(get_redis),
     settings: Settings = Depends(get_settings),
 ):
+    if not settings.SENDGRID_API_KEY or not settings.EMAIL_FROM_ADDRESS:
+        raise HTTPException(
+            status_code=500,
+            detail="Password resets have not been configured on this server yet.",
+        )
     for key in redis.scan_iter("user:*"):
-        x = redis.hgetall(key)
-        if x.get("email") == email:
-            token = token_urlsafe()
-            redis.setex("reset", timedelta(minutes=30), token)
-            redis.setex(f"reset:{token}", timedelta(minutes=30), x.get("id"))
-            message = Mail(
-                from_email="scoretracker@protonmail.com",
-                to_emails=f"{email}",
-                subject="password reset",
-                html_content=f"<strong>Here is the link for your password reset</strong> <br> <a href='{token}' ",
-            )
-            sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
-            sg.send(message)
+        if redis.hget(key, "email") != email:
+            continue
+        user_id = redis.hget(key, "id")
+        token = token_urlsafe()
+        redis.set(f"reset:{user_id}", token, ex=timedelta(hours=1))
+        message = Mail(
+            from_email=settings.EMAIL_FROM_ADDRESS,
+            to_emails=f"{email}",
+            subject="FOHS ScoreTracker password reset",
+            html_content=f"Your password reset token is <code>{token}</code>",
+        )
+        client = SendGridAPIClient(settings.SENDGRID_API_KEY)
+        client.send(message)
+        return Response(status_code=204)
 
 
-@router.post("/users/{email}/reset/confirm")
-def password_update(
-    token: str = Body(...),
+@router.post(
+    "/reset/{email}/confirm",
+    summary="Reset a password using a password reset token",
+    status_code=204,
+)
+def reset_password(
     email: str,
-    redis: Redis = Depends(get_redis),
+    token: str = Body(...),
     password: str = Body(...),
+    redis: Redis = Depends(get_redis),
 ):
-    for db_token in redis.scan_iter("reset:*"):
-        if token == db_token:
-            user_id = redis.hget(f"reset:{db_token}")
-            user_key = f"user:{user_id}"
-            user_data = redis.hgetall(user_key)
-            user = schemas.User(**user_data.dict(), id=user_id)
-            redis.hset(user_key, mapping=user.dict())
+    for key in redis.scan_iter("user:*"):
+        if redis.hget(key, "email") != email:
+            continue
+        user_id = redis.hget(key, "id")
+        if redis.get(f"reset:{user_id}") != token:
+            raise HTTPException(400, "Invalid reset token")
+        redis.hset(key, "password", password)
+        return Response(status_code=204)

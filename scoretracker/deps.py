@@ -25,10 +25,6 @@ def get_redis() -> Redis:  # pragma: no cover
     return Redis.from_url(settings.REDIS_URL, decode_responses=True)
 
 
-
-
-
-
 def get_current_user(
     token: str = Depends(oauth_schema), redis: Redis = Depends(get_redis)
 ):

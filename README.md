@@ -137,9 +137,11 @@ This is an example of how to list things you need to use the software and how to
 
     ```sh
     REDIS_URL="redis://user:password@server/db"
+    SENDGRID_API_KEY="key"
+    EMAIL_FROM_ADDRESS="scoretracker@fohs-score-tracker.github.io"
     ```
 
-    ℹ The database provided by the `REDIS_URL` variable is **not** used for testing.
+    ℹ The database provided by the `REDIS_URL` variable is **not** used for running tests.
 
 
 <!-- USAGE EXAMPLES -->

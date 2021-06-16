@@ -1,6 +1,7 @@
 import pytest
 from fakeredis import FakeRedis
 from fastapi.testclient import TestClient
+
 from scoretracker import app
 from scoretracker.deps import get_redis
 
