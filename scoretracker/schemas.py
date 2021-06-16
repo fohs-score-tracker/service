@@ -42,19 +42,6 @@ class UserCreate(BaseModel):
         }
 
 
-
-class PasswordChange(BaseModel):
-    password: str
-
-    class Config:
-        schema_extra = {
-            "title": "Password Reset",
-            "example": {
-                "password": "********",
-            },
-        }
-
-
 class PlayerCreate(BaseModel):
     name: str
 
@@ -166,6 +153,9 @@ class PlayerResult(BaseModel):
     @classmethod
     def find(cls, redis: Redis, player_id: conint(gt=0)):
         return Player.find(redis, player_id).convert(redis)
+
+    class Config:
+        schema_extra = {"title": "Player"}
 
 
 class TeamCreate(BaseModel):
