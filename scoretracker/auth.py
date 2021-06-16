@@ -62,6 +62,7 @@ def get_reset_token(
         client = SendGridAPIClient(settings.SENDGRID_API_KEY)
         client.send(message)
         return Response(status_code=204)
+    return Response(status_code=204)
 
 
 @router.post(
