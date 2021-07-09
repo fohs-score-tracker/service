@@ -42,4 +42,3 @@ typing-extensions==3.10.0.0
 urllib3==1.26.5
 uvicorn==0.14.0
 wrapt==1.12.1
-sendgrid==6.7.0

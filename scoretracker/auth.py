@@ -14,7 +14,7 @@ router = APIRouter(tags=["Tokens"])
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(), redis: Redis = Depends(get_redis)
 ):
-    """**Note:** Token expires in 30 minutes of inactivity."""
+    """**Note:** Token expires after 1 day of inactivity."""
     for key in redis.scan_iter("user:*"):
         if redis.hget(key, "email") == form_data.username:
             if redis.hget(key, "password") == form_data.password:
