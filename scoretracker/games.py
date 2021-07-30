@@ -21,6 +21,7 @@ def new_game(data: schemas.GameCreate, redis: Redis = Depends(get_redis)):
 
     prefix = f"game:{game.id}"
     redis.set(prefix + ":team_id", game.team_id)
+    redis.set(prefix + ":name", game.name)
     redis.set(prefix + ":other_team", game.other_team)
     redis.set(prefix + ":date", str(game.date))
 

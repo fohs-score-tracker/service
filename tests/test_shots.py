@@ -5,7 +5,12 @@ from fastapi.testclient import TestClient
 new_player = {"name": "test"}
 new_team = {"name": "test", "coaches": [], "players": []}
 new_shot = {"x": 50, "y": 25, "points": 3, "game_id": 1, "missed": False}
-new_game = {"team_id": 1, "other_team": "test", "date": str(date.today())}
+new_game = {
+    "team_id": 1,
+    "name": "TestGame",
+    "other_team": "test",
+    "date": str(date.today()),
+}
 
 expected_shot = {"id": 1, **new_shot}
 
