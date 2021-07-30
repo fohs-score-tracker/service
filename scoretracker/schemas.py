@@ -209,7 +209,7 @@ class TeamResult(BaseModel):
 
 class Game(BaseModel):
     id: conint(gt=0)
-    game_name: str
+    name: str
     team_id: conint(gt=0)
     other_team: str
     date: date
@@ -218,7 +218,7 @@ class Game(BaseModel):
     def find(redis: Redis, game_id: conint(gt=0)):
         return Game(
             id=game_id,
-            game_name=redis.get(f"game:{game_id}:game_name"),
+            name=redis.get(f"game:{game_id}:name"),
             team_id=redis.get(f"game:{game_id}:team_id"),
             other_team=redis.get(f"game:{game_id}:other_team"),
             date=redis.get(f"game:{game_id}:date"),
@@ -227,7 +227,7 @@ class Game(BaseModel):
     def convert(self, redis: Redis):
         return GameResult(
             id=self.id,
-            game_name=self.game_name,
+            name=self.name,
             team=TeamResult.find(redis, self.team_id),
             other_team=self.other_team,
             date=self.date,
@@ -236,7 +236,7 @@ class Game(BaseModel):
 
 class GameResult(BaseModel):
     id: conint(gt=0) = Field(..., example=1)
-    game_name: str = Field(..., example="Home Team")
+    name: str = Field(..., example="Home Team")
     team: TeamResult
     other_team: str = Field(..., example="Away Team")
     date: date
@@ -252,7 +252,7 @@ class GameResult(BaseModel):
 
 
 class GameCreate(BaseModel):
-    game_name: str = Field(..., example="Game1")
+    name: str = Field(..., example="Game1")
     team_id: conint(gt=0) = Field(..., example=1)
     other_team: str = Field(..., example="Away Team")
     date: Optional[date] = Field(default_factory=date.today)
