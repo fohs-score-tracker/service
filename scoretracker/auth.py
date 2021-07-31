@@ -1,32 +1,34 @@
-from datetime import timedelta
-from secrets import token_urlsafe
+# TODO
 
-from fastapi import APIRouter, Depends, HTTPException, Response
-from fastapi.security import OAuth2PasswordRequestForm, oauth2
-from redis import Redis
+# from datetime import timedelta
+# from secrets import token_urlsafe
 
-from .deps import get_redis, oauth_schema
+# from fastapi import APIRouter, Depends, HTTPException, Response
+# from fastapi.security import OAuth2PasswordRequestForm, oauth2
+# from redis import Redis
 
-router = APIRouter(tags=["Tokens"])
+# from .deps import get_redis, oauth_schema
 
-
-@router.post("/token", summary="Login")
-def login(
-    form_data: OAuth2PasswordRequestForm = Depends(), redis: Redis = Depends(get_redis)
-):
-    """**Note:** Token expires after 1 day of inactivity."""
-    for key in redis.scan_iter("user:*"):
-        if redis.hget(key, "email") == form_data.username:
-            if redis.hget(key, "password") == form_data.password:
-                token = token_urlsafe()
-                token_key = "token:" + token
-                redis.set(token_key, redis.hget(key, "id"), ex=timedelta(days=1))
-                return {"token_type": "bearer", "access_token": token}
-            raise HTTPException(401, detail="Invalid password")
-    raise HTTPException(401, detail="User does not exist")
+# router = APIRouter(tags=["Tokens"])
 
 
-@router.post("/token/revoke", summary="Logout", status_code=204)
-def logout(token: str = Depends(oauth_schema), redis: Redis = Depends(get_redis)):
-    redis.delete("token:" + token)
-    return Response(status_code=204)
+# @router.post("/token", summary="Login")
+# def login(
+#     form_data: OAuth2PasswordRequestForm = Depends(), redis: Redis = Depends(get_redis)
+# ):
+#     """**Note:** Token expires after 1 day of inactivity."""
+#     for key in redis.scan_iter("user:*"):
+#         if redis.hget(key, "email") == form_data.username:
+#             if redis.hget(key, "password") == form_data.password:
+#                 token = token_urlsafe()
+#                 token_key = "token:" + token
+#                 redis.set(token_key, redis.hget(key, "id"), ex=timedelta(days=1))
+#                 return {"token_type": "bearer", "access_token": token}
+#             raise HTTPException(401, detail="Invalid password")
+#     raise HTTPException(401, detail="User does not exist")
+
+
+# @router.post("/token/revoke", summary="Logout", status_code=204)
+# def logout(token: str = Depends(oauth_schema), redis: Redis = Depends(get_redis)):
+#     redis.delete("token:" + token)
+#     return Response(status_code=204)

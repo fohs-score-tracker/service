@@ -1,35 +1,8 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from strawberry import Schema
+from strawberry.asgi import GraphQL
 
-from . import auth, games, players, teams, users
+from .mutation import Mutation
+from .query import Query
 
-app = FastAPI(
-    title="ScoreTracker",
-    version="0.0.0",
-    openapi_tags=[
-        {
-            "name": "Users",
-            "description": "Add user accounts",
-        },
-        {"name": "Players", "description": "Register and manage players"},
-        {"name": "Teams", "description": "Organize players in teams"},
-        {"name": "Games", "description": "Record games"},
-        {"name": "Tokens", "description": "Request and revoke session tokens"},
-    ],
-    docs_url="/",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-app.include_router(users.router)
-app.include_router(players.router)
-app.include_router(teams.router)
-app.include_router(games.router)
-app.include_router(auth.router)
+schema = Schema(query=Query, mutation=Mutation)
+app = GraphQL(schema)
