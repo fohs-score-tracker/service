@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import conint
 from redis import Redis
 
@@ -43,3 +43,20 @@ def all_games(redis: Redis = Depends(get_redis)):
     return [
         schemas.GameResult.find(redis, game_id) for game_id in redis.smembers("games")
     ]
+
+@router.delete("/games/{game_id}", summary="Delete game by Id", status_code=204, responses={
+    404:  {"description": "Game does not exist"},
+    204:  {"description": "Game was successfully deleted"},
+})
+
+def delete_game(game_id: conint(gt=0), redis: Redis = Depends(get_redis)):
+    prefix = f"game:{game_id}"
+    if not redis.sismember("games", game_id):
+        raise HTTPException(404)
+    else:
+        redis.srem("games", game_id)
+        redis.delete(prefix + ":name")
+        redis.delete(prefix + ":other_team" )
+        redis.delete(prefix + ":date")
+        redis.delete(prefix +"team_id")
+    return Response(status_code=204)
