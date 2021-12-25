@@ -4,7 +4,8 @@ Pydantic models.
 from __future__ import annotations
 
 from datetime import date
-from typing import List, Optional
+from types import prepare_class
+from typing import List, Optional, Set
 
 from pydantic import BaseModel, EmailStr, Field, conint
 from redis import Redis
@@ -44,12 +45,14 @@ class UserCreate(BaseModel):
 
 class PlayerCreate(BaseModel):
     name: str
+    user_id: conint(gt=0)
 
     class Config:
         schema_extra = {
             "title": "New Player",
             "example": {
                 "name": "Jeff",
+                "user_id": 1,
             },
         }
 
@@ -124,12 +127,14 @@ class ShotResult(BaseModel):
 class Player(BaseModel):
     id: conint(gt=0)
     name: str
+    user_id: conint(gt=0)
     shot_ids: List[conint(gt=0)]
 
     @classmethod
     def find(cls, redis: Redis, player_id: conint(gt=0)):
         return cls(
             id=player_id,
+            user_id=redis.get(f"player:{player_id}:user-id"),
             shot_ids=redis.smembers(f"player:{player_id}:shots"),
             name=redis.get(f"player:{player_id}:name"),
         )
@@ -138,6 +143,7 @@ class Player(BaseModel):
         return PlayerResult(
             id=self.id,
             name=self.name,
+            user=redis.hgetall(f"user:{self.user_id}"),
             shots=[
                 Shot.find(redis, shot_id).convert()
                 for shot_id in redis.smembers(f"player:{self.id}:shots")
@@ -148,6 +154,7 @@ class Player(BaseModel):
 class PlayerResult(BaseModel):
     id: conint(gt=0) = Field(..., example=1)
     name: str = Field(..., example="Jeff")
+    user: UserProfile
     shots: List[ShotResult]
 
     @classmethod
@@ -155,80 +162,83 @@ class PlayerResult(BaseModel):
         return Player.find(redis, player_id).convert(redis)
 
 
-class TeamCreate(BaseModel):
-    name: str
-    players: List[conint(gt=0)] = []
-    coaches: List[conint(gt=0)] = []
+# class TeamCreate(BaseModel):
+#     name: str
+#     players: List[conint(gt=0)] = []
+#     coaches: List[conint(gt=0)] = []
 
-    class Config:
-        schema_extra = {
-            "title": "New Team",
-            "example": {"name": "Home Team", "players": [1], "coaches": [1]},
-        }
-
-
-class Team(BaseModel):
-    id: conint(gt=0)
-    name: str
-    coaches: List[conint(gt=0)]
-    players: List[conint(gt=0)]
-
-    @classmethod
-    def find(cls, redis: Redis, team_id: conint(gt=0)):
-        return cls(
-            id=team_id,
-            name=redis.get(f"team:{team_id}:name"),
-            players=redis.smembers(f"team:{team_id}:players"),
-            coaches=redis.smembers(f"team:{team_id}:coaches"),
-        )
-
-    def convert(self, redis: Redis) -> TeamResult:
-        return TeamResult(
-            id=self.id,
-            name=self.name,
-            players=[PlayerResult.find(redis, p) for p in self.players],
-            coaches=[redis.hgetall(f"user:{c}") for c in self.coaches],
-        )
+#     class Config:
+#         schema_extra = {
+#             "title": "New Team",
+#             "example": {"name": "Home Team", "players": [1], "coaches": [1]},
+#         }
 
 
-class TeamResult(BaseModel):
-    id: conint(gt=0) = Field(..., example=1)
-    name: str = Field(..., example="Home Team")
-    coaches: List[UserProfile]
-    players: List[PlayerResult]
+# class Team(BaseModel):
+#     id: conint(gt=0)
+#     name: str
+#     coaches: List[conint(gt=0)]
+#     players: List[conint(gt=0)]
 
-    @classmethod
-    def find(cls, redis: Redis, team_id: conint(gt=0)):
-        return Team.find(redis, team_id).convert(redis)
+#     @classmethod
+#     def find(cls, redis: Redis, team_id: conint(gt=0)):
+#         return cls(
+#             id=team_id,
+#             name=redis.get(f"team:{team_id}:name"),
+#             players=redis.smembers(f"team:{team_id}:players"),
+#             coaches=redis.smembers(f"team:{team_id}:coaches"),
+#         )
 
-    class Config:
-        schema_extra = {
-            "title": "Team",
-        }
+#     def convert(self, redis: Redis) -> TeamResult:
+#         return TeamResult(
+#             id=self.id,
+#             name=self.name,
+#             players=[PlayerResult.find(redis, p) for p in self.players],
+#             coaches=[redis.hgetall(f"user:{c}") for c in self.coaches],
+#         )
+
+
+# class TeamResult(BaseModel):
+#     id: conint(gt=0) = Field(..., example=1)
+#     name: str = Field(..., example="Home Team")
+#     coaches: List[UserProfile]
+#     players: List[PlayerResult]
+
+#     @classmethod
+#     def find(cls, redis: Redis, team_id: conint(gt=0)):
+#         return Team.find(redis, team_id).convert(redis)
+
+#     class Config:
+#         schema_extra = {
+#             "title": "Team",
+#         }
 
 
 class Game(BaseModel):
     id: conint(gt=0)
     name: str
-    team_id: conint(gt=0)
+    user_id: conint(gt=0)
+    player_ids: List[conint(gt=0)]
     other_team: str
     date: date
 
-    @staticmethod
-    def find(redis: Redis, game_id: conint(gt=0)):
-        return Game(
+    @classmethod
+    def find(cls, redis: Redis, game_id: conint(gt=0)):
+        return cls(
             id=game_id,
             name=redis.get(f"game:{game_id}:name"),
-            team_id=redis.get(f"game:{game_id}:team_id"),
+            user_id=redis.get(f"game:{game_id}:user-id"),
+            player_ids=redis.smembers(f"game:{game_id}:player-ids"),
             other_team=redis.get(f"game:{game_id}:other_team"),
             date=redis.get(f"game:{game_id}:date"),
         )
 
-    def convert(self, redis: Redis):
+    def convert(self, redis: Redis) -> GameResult:
         return GameResult(
             id=self.id,
             name=self.name,
-            team=TeamResult.find(redis, self.team_id),
+            user=redis.hgetall(f"user:{self.user_id}"),
+            players=[PlayerResult.find(redis, p) for p in self.player_ids],
             other_team=self.other_team,
             date=self.date,
         )
@@ -237,12 +247,13 @@ class Game(BaseModel):
 class GameResult(BaseModel):
     id: conint(gt=0) = Field(..., example=1)
     name: str = Field(..., example="Home Team")
-    team: TeamResult
+    user: UserProfile
+    players: List[PlayerResult]
     other_team: str = Field(..., example="Away Team")
     date: date
 
-    @staticmethod
-    def find(redis: Redis, game_id: conint(gt=0)):
+    @classmethod
+    def find(cls, redis: Redis, game_id: conint(gt=0)):
         return Game.find(redis, game_id).convert(redis)
 
     class Config:
@@ -253,7 +264,8 @@ class GameResult(BaseModel):
 
 class GameCreate(BaseModel):
     name: str = Field(..., example="Game1")
-    team_id: conint(gt=0) = Field(..., example=1)
+    user_id: conint(gt=0) = Field(..., example=1)
+    player_ids: List[conint(gt=0)]
     other_team: str = Field(..., example="Away Team")
     date: Optional[date] = Field(default_factory=date.today)
 

@@ -72,7 +72,7 @@ def new_user(data: schemas.UserCreate, redis: Redis = Depends(get_redis)):
     return user
 
 
-@router.patch(
+@router.put(
     "/users/{user_id}",
     response_model=schemas.UserProfile,
     responses={
