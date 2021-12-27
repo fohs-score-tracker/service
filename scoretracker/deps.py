@@ -9,7 +9,11 @@ from redis import Redis
 from .schemas import User
 from .utils import Settings
 
+from passlib.context import CryptContext
+
 oauth_schema = OAuth2PasswordBearer("/token")
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @lru_cache
@@ -33,3 +37,11 @@ def get_current_user(
         raise HTTPException(401, detail="Invalid or expired token")
     redis.expire(key, timedelta(days=1))
     return User.parse_obj(redis.hgetall(f"user:{redis.get(key)}"))
+
+
+def hash_user_password(password: str):
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)

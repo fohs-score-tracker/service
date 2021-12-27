@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.security import OAuth2PasswordRequestForm, oauth2
 from redis import Redis
 
-from .deps import get_redis, oauth_schema
+from .deps import get_redis, oauth_schema, verify_password
 
 router = APIRouter(tags=["Tokens"])
 
@@ -17,7 +17,8 @@ def login(
     """**Note:** Token expires after 1 day of inactivity."""
     for key in redis.scan_iter("user:*"):
         if redis.hget(key, "email") == form_data.username:
-            if redis.hget(key, "password") == form_data.password:
+            hash_pw = redis.hget(key, "password")
+            if verify_password(form_data.password, hash_pw):
                 token = token_urlsafe()
                 token_key = "token:" + token
                 redis.set(token_key, redis.hget(key, "id"), ex=timedelta(days=1))

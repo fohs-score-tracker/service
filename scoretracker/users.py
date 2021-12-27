@@ -9,7 +9,7 @@ from pydantic import conint
 from redis import Redis
 
 from . import schemas
-from .deps import get_current_user, get_redis
+from .deps import get_current_user, get_redis, hash_user_password
 
 router = APIRouter(tags=["Users"])
 
@@ -67,6 +67,7 @@ def delete_user(user_id: conint(gt=0), redis: Redis = Depends(get_redis)):
     summary="Create a new user",
 )
 def new_user(data: schemas.UserCreate, redis: Redis = Depends(get_redis)):
+    data.password = hash_user_password(data.password)
     user = schemas.User(id=redis.incr("next_user_id"), **data.dict())
     redis.hset(f"user:{user.id}", mapping=user.dict())
     return user
