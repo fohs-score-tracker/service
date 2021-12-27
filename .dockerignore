@@ -1,0 +1,14 @@
+venv
+.env
+
+*.pyc
+__pycache__
+.vscode
+
+# tests
+.pytest_cache
+.coverage
+.hypothesis
+htmlcov/
+
+.github
