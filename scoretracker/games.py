@@ -55,7 +55,7 @@ def all_games(redis: Redis = Depends(get_redis)):
     ]
 
 
-@router.put(
+@router.patch(
     "/games/{game_id}",
     summary="Edit a game",
     response_model=schemas.GameResult,
