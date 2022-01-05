@@ -17,6 +17,7 @@ router = APIRouter(tags=["Games"])
     summary="Record a new game",
     response_description="New Game",
     response_model=schemas.GameResult,
+    status_code=201,
 )
 def new_game(data: schemas.GameCreate, redis: Redis = Depends(get_redis)):
     game = schemas.Game(id=redis.incr("next_game_id"), **data.dict())

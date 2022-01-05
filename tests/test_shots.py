@@ -7,7 +7,6 @@ new_user = {"name": "dan", "email": "dan@example.com", "password": "a"}
 new_player = {"name": "test", "user_id": 1}
 new_shot = {"x": 50, "y": 25, "points": 3, "game_id": 1, "missed": False}
 new_game = {
-    "team_id": 1,
     "name": "TestGame",
     "other_team": "test",
     "date": str(date.today()),
