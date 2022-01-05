@@ -1,4 +1,12 @@
 from fastapi.testclient import TestClient
+from requests.models import Response
+
+
+def create_user(client: Response, name: str, email: str, password: str):
+
+    return client.post(
+        "/users/new", json={"name": name, "email": email, "password": password}
+    )
 
 
 def test_list_empty(client: TestClient):

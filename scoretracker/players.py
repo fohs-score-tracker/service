@@ -48,11 +48,11 @@ def delete_player(player_id: conint(gt=0), redis: Redis = Depends(get_redis)):
     prefix = f"player:{player_id}"
     for shot_id in redis.smembers(prefix + ":shots"):
         schemas.Shot.delete(redis, shot_id)
-    redis.delete(prefix + ":shots", prefix + ":name")
+    redis.delete(prefix + ":shots", prefix + ":name", prefix + "user-id")
     redis.srem("players", player_id)
-    for team_id in redis.smembers("teams"):
-        if redis.sismember(f"team:{team_id}:players", player_id):
-            redis.srem(f"team:{team_id}:players", player_id)
+    for game_id in redis.smembers("games"):
+        if redis.sismember(f"game:{game_id}:player-ids", player_id):
+            redis.srem(f"game:{game_id}:player-ids", player_id)
     return Response(status_code=204)
 
 
@@ -66,6 +66,7 @@ def delete_player(player_id: conint(gt=0), redis: Redis = Depends(get_redis)):
 def new_player(data: schemas.PlayerCreate, redis: Redis = Depends(get_redis)):
     new_id = redis.incr("next_player_id")
     redis.set(f"player:{new_id}:name", data.name)
+    redis.set(f"player:{new_id}:user-id", data.user_id)
     redis.sadd("players", new_id)
     return schemas.PlayerResult.find(redis, new_id)
 
@@ -127,4 +128,5 @@ def edit_player(
     if not redis.sismember("players", player_id):
         raise HTTPException(404)
     redis.set(f"player:{player_id}:name", data.name)
+    redis.set(f"player:{player_id}:user-id", data.user_id)
     return schemas.PlayerResult.find(redis, player_id)
